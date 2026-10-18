@@ -32,6 +32,11 @@
     "kind": "world",
     "api": 6,
     "displayName": "GPTSovits 语音",
+    "tags": [
+      "voice",
+      "local",
+      "experimental"
+    ],
     "webUiClient": "dist/webui.js",
     "webUiStyle": "dist/webui.css",
     "describe": "describe.json"
