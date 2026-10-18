@@ -67,14 +67,14 @@ const upstream = (path: string, bytes: number, sha256: string): PinnedFile => ({
 
 /** 两个版本共用的文本与参考音频特征模型。 */
 const SHARED: readonly PinnedFile[] = [
-  upstream('s1v3.ckpt', 155284856, ''),
-  upstream('chinese-hubert-base/config.json', 1449, ''),
-  upstream('chinese-hubert-base/preprocessor_config.json', 212, ''),
-  upstream('chinese-hubert-base/pytorch_model.bin', 188811417, ''),
-  upstream('chinese-roberta-wwm-ext-large/config.json', 963, ''),
-  upstream('chinese-roberta-wwm-ext-large/pytorch_model.bin', 0, ''),
-  upstream('chinese-roberta-wwm-ext-large/tokenizer.json', 0, ''),
-  upstream('fast_langdetect/lid.176.bin', 0, ''),
+  upstream('s1v3.ckpt', 155284856, '87133414860ea14ff6620c483a3db5ed07b44be42e2c3fcdad65523a729a745a'),
+  upstream('chinese-hubert-base/config.json', 1449, 'c3e5060a1277e0f078cc6be9da4528a605dba6ece93018981fe2c820e5c7b103'),
+  upstream('chinese-hubert-base/preprocessor_config.json', 212, 'dcd684124d06722947939d41ea6ae58dbf10968c60a11a29f23ddc602c64a29b'),
+  upstream('chinese-hubert-base/pytorch_model.bin', 188811417, '24164f129c66499d1346e2aa55f183250c223161ec2770c0da3d3b08cf432d3c'),
+  upstream('chinese-roberta-wwm-ext-large/config.json', 963, '3d57de2fd7e80d0e5c8ff194f0bbb6baa10df7e43fc262a0cc71298a78b0a3e5'),
+  upstream('chinese-roberta-wwm-ext-large/pytorch_model.bin', 651225145, 'e53a693acc59ace251d143d068096ae0d7b79e4b1b503fa84c9dcf576448c1d8'),
+  upstream('chinese-roberta-wwm-ext-large/tokenizer.json', 268962, '173796956820ea27bd14f76bf28162607ff4254807e2948253eb5b46f5bb643b'),
+  upstream('fast_langdetect/lid.176.bin', 131266198, '7e69ec5451bc261cc7844e49e4792a85d7f09c06789ec800fc4a44aec362764e'),
 ];
 
 /** 上游魔搭仓库还没有 V5 权重：先试本扩展的魔搭仓库，再试上游 Hugging Face。 */
@@ -83,8 +83,8 @@ const v5 = (path: string, bytes: number, sha256: string): PinnedFile => ({
 });
 
 export const MODEL_FILES: Readonly<Record<ModelVersion, readonly PinnedFile[]>> = {
-  v5turbo: [...SHARED, v5('gsv-v5-pretrained/s2Gv5turbo.pth', 766406144, ''), v5('gsv-v5-pretrained/vocoder.pth', 0, '')],
-  v2ProPlus: [...SHARED, upstream('v2Pro/s2Gv2ProPlus.pth', 200125741, ''), upstream('sv/pretrained_eres2netv2w24s4ep4.ckpt', 0, '')],
+  v5turbo: [...SHARED, v5('gsv-v5-pretrained/s2Gv5turbo.pth', 766406144, '287b32a06b7d486f5303ec520468b0728fb01aac8b0f5d86fd5455c9a1d3e022'), v5('gsv-v5-pretrained/vocoder.pth', 57761163, 'b7543c83222aa2105bb4efb56845086bc5f2eeba61243d723ffa062052b3221f')],
+  v2ProPlus: [...SHARED, upstream('v2Pro/s2Gv2ProPlus.pth', 200125741, 'd42a22bbbf65fb2bbdd45ad6a66841156977db45c7aabe0a6992ff378d9c7d3b'), upstream('sv/pretrained_eres2netv2w24s4ep4.ckpt', 107528697, '4f5a0bf73c61eb41b174e1bb54e7ee3c83233892be8e0af1f187024e8e581a35')],
 };
 
 /** api_v2 配置里的权重路径(相对运行时根)。 */
