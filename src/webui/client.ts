@@ -4,6 +4,7 @@
  */
 import type { WebUiClientBundle, WebUiPanel, WebUiPanelContext } from 'cortico/web/shared/client-panel.ts';
 import { panelText } from '../i18n.ts';
+import { isPreset, presetLabel } from '../voices.ts';
 import type { PanelState } from '../world.ts';
 import './style.css';
 
@@ -62,7 +63,7 @@ const voicePanel: WebUiPanel = {
     const text = ui.textarea({});
     text.rows = 2;
     const save = ui.button(t.saveVoice, { size: 'sm', onClick: () => void saveVoice() });
-    const reset = ui.button(t.defaultVoice, { size: 'sm', onClick: () => void call('resetVoice') });
+    const reset = ui.button(t.usePreset, { size: 'sm', onClick: () => void call('resetVoice') });
     const voiceActs = ui.actions();
     voiceActs.append(save, reset);
     voice.append(current, ui.field(t.pickVoice, file), ui.field(t.voiceText, text), voiceActs);
@@ -126,8 +127,11 @@ const voicePanel: WebUiPanel = {
       output.textContent = sv.phase === 'error' || sv.phase === 'starting' ? s.output.join('\n') : '';
       output.hidden = !output.textContent;
       // 音色与队列
-      current.textContent = s.voice ? `${s.voice.isDefault ? `${t.defaultVoice}:` : ''}${s.voice.audio}${s.voice.text ? ` · ${s.voice.text}` : ''}` : t.noVoice;
-      if (document.activeElement !== text && s.voice && !text.value) text.value = s.voice.isDefault ? '' : s.voice.text;
+      current.textContent = !s.voice ? t.noVoice
+        : s.voice.preset && isPreset(s.voice.preset) ? `${t.preset}:${presetLabel(s.voice.preset, ctx.language)}`
+          : `${s.voice.audio}${s.voice.text ? ` · ${s.voice.text}` : ''}`;
+      reset.hidden = !s.voice || !!s.voice.preset;
+      if (document.activeElement !== text && s.voice && !s.voice.preset && !text.value) text.value = s.voice.text;
       queue.textContent = [s.queue ? t.queue(s.queue) : '', s.lastError ? `${t.lastError}:${s.lastError}` : ''].filter(Boolean).join(' · ');
     }
 

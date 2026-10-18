@@ -2,11 +2,12 @@ import { join } from 'node:path';
 import { modelsRoot, runtimesRoot } from 'cortico/paths.ts';
 import { describeTools, type WorldDefinition, type WorldDescribe } from 'cortico/world.ts';
 import {
-  DEVICE_OPTIONS, GPT_SOVITS_DEFAULTS, GPT_SOVITS_ID, PROMPT_LANGUAGE_OPTIONS, TIER_OPTIONS,
+  DEVICE_OPTIONS, GPT_SOVITS_DEFAULTS, GPT_SOVITS_ID, PROMPT_LANGUAGE_OPTIONS, TIER_OPTIONS, VOICE_OPTIONS,
   promptLanguageOptions, systemDeviceLabel, tierOptions, type GptSovitsConfigSection,
 } from './config.ts';
 import { listOutputDevices } from './player.ts';
 import { SOVITS_TOOL_DECLS } from './tools.ts';
+import { VOICE_PRESETS, presetLabel } from './voices.ts';
 import { GptSovitsWorld, STATE_EVENT } from './world.ts';
 
 const DESCRIBE: WorldDescribe = {
@@ -28,6 +29,7 @@ export const GPT_SOVITS: WorldDefinition<GptSovitsConfigSection> = {
   configOptions(kind, language) {
     if (kind === TIER_OPTIONS) return tierOptions(language);
     if (kind === PROMPT_LANGUAGE_OPTIONS) return promptLanguageOptions();
+    if (kind === VOICE_OPTIONS) return VOICE_PRESETS.map((id) => ({ value: id, label: presetLabel(id, language) }));
     if (kind === DEVICE_OPTIONS) {
       let devices: Array<{ value: string; label: string }> = [];
       try { devices = listOutputDevices().map((d) => ({ value: d.name, label: d.name })); } catch { /* audify 不可用时只留系统默认 */ }

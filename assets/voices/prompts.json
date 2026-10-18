@@ -1,0 +1,39 @@
+{
+  "model": "OpenMOSS-Team/MOSS-VoiceGenerator (Apache-2.0)",
+  "audio_temperature": 1.2,
+  "text": "嗯，那个，文件我放，呃，放桌面上了，就在那个新建文件夹里。",
+  "voices": {
+    "coo-f": {
+      "instruction": "十几岁的年轻女生，声音软糯清甜、带点奶气，语速很快，一口气说完，语调平平的，没有情绪起伏，像随口跟熟人说话。",
+      "candidate": "coo-f-3.wav"
+    },
+    "coo-m": {
+      "instruction": "二十岁左右的年轻男生，声音清爽柔和，语速很快，一口气说完，语调平平的，没有情绪起伏，像随口跟熟人说话。",
+      "candidate": "coo-m-4.wav"
+    },
+    "forge-f": {
+      "instruction": "二十岁左右的年轻女生，声音清甜干脆、咬字利落，语速很快，一口气说完，语调平平的，没有情绪起伏，像随口跟熟人说话。",
+      "candidate": "forge-f-5.wav"
+    },
+    "forge-m": {
+      "instruction": "三十岁左右的男性，声音沉稳低厚、干脆利落，语速很快，一口气说完，语调平平的，没有情绪起伏，像随口跟熟人说话。",
+      "candidate": "forge-m-2.wav"
+    },
+    "heart-f": {
+      "instruction": "十几岁的元气少女，声音甜美明亮、带点娃娃音，语速很快，一口气说完，语调平平的，没有情绪起伏，像随口跟熟人说话。",
+      "candidate": "heart-f-1.wav"
+    },
+    "heart-m": {
+      "instruction": "二十岁左右的阳光男生，声音明亮温暖、音调不尖，语速很快，一口气说完，语调平平的，没有情绪起伏，像随口跟熟人说话。",
+      "candidate": "heart-m-1.wav"
+    },
+    "winter-f": {
+      "instruction": "十几岁的年轻女生，声音轻柔清冷、偏小声、有点可爱，语速很快，一口气说完，语调平平的，没有情绪起伏，像随口跟熟人说话。",
+      "candidate": "winter-f-1.wav"
+    },
+    "winter-m": {
+      "instruction": "年轻男性，声音低沉清冷、偏轻，语速很快，一口气说完，语调平平的，没有情绪起伏，像随口跟熟人说话。",
+      "candidate": "winter-m-3.wav"
+    }
+  }
+}

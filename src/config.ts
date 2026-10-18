@@ -17,8 +17,8 @@ export interface GptSovitsConfigSection {
   serverUrl: string;
   /** World 启动时一并启动本机推理服务。 */
   autoStart: boolean;
-  /** 参考音频的绝对路径与它的文字;语言按 `auto` 识别。 */
-  voice: { audio: string; text: string };
+  /** 预设音色(见 voices.ts);`audio` 填了参考音频的绝对路径时用它与 `text`,语言按 `auto` 识别。 */
+  voice: { preset: string; audio: string; text: string };
   /** 语速倍率，对应 api_v2 的 `speed_factor`。 */
   speed: number;
   /** 输出音量，0–1。 */
@@ -37,7 +37,7 @@ export const GPT_SOVITS_DEFAULTS: GptSovitsConfigSection = {
   runtimeDir: '',
   serverUrl: '',
   autoStart: true,
-  voice: { audio: '', text: '' },
+  voice: { preset: 'coo-f', audio: '', text: '' },
   speed: 1,
   volume: 1,
   outputDevice: '',
@@ -50,10 +50,12 @@ const K = `worlds.${GPT_SOVITS_ID}`;
 export const TIER_OPTIONS = `${GPT_SOVITS_ID}:tier`;
 export const DEVICE_OPTIONS = `${GPT_SOVITS_ID}:output-device`;
 export const PROMPT_LANGUAGE_OPTIONS = `${GPT_SOVITS_ID}:prompt-language`;
+export const VOICE_OPTIONS = `${GPT_SOVITS_ID}:voice`;
 
 const TEXT = {
   zh: {
     title: 'GPTSovits 语音',
+    preset: { title: '音色', description: '上传了自定义参考音频时用自定义的。' },
     tier: { title: '推理档', auto: '自动', cuda: '显卡(NVIDIA)', cpu: 'CPU', description: '自动：检测到 NVIDIA 显卡用显卡档，否则用 CPU 档。修改后重启推理服务生效。' },
     speed: { title: '语速', description: '1 为原速。' },
     volume: { title: '音量' },
@@ -65,6 +67,7 @@ const TEXT = {
   },
   en: {
     title: 'GPTSovits Voice',
+    preset: { title: 'Voice', description: 'An uploaded reference audio takes precedence.' },
     tier: { title: 'Inference tier', auto: 'Auto', cuda: 'GPU (NVIDIA)', cpu: 'CPU', description: 'Auto uses the GPU tier when an NVIDIA GPU is found, the CPU tier otherwise. Takes effect when the inference server restarts.' },
     speed: { title: 'Speech rate', description: '1 is the original rate.' },
     volume: { title: 'Volume' },
@@ -95,6 +98,7 @@ export function configGroups(language: Language): ConfigGroup[] {
       type: 'object',
       title: t.title,
       properties: {
+        [`${K}.voice.preset`]: { type: 'string', title: t.preset.title, description: t.preset.description, 'x-options': VOICE_OPTIONS, 'x-hot': true },
         [`${K}.tier`]: { type: 'string', title: t.tier.title, description: t.tier.description, 'x-options': TIER_OPTIONS, 'x-hot': true },
         [`${K}.speed`]: { type: 'number', title: t.speed.title, description: t.speed.description, minimum: SPEED_MIN, maximum: SPEED_MAX, multipleOf: .05, 'x-hot': true },
         [`${K}.volume`]: { type: 'number', title: t.volume.title, minimum: 0, maximum: 1, multipleOf: .05, 'x-hot': true },

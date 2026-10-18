@@ -17,6 +17,7 @@ import { basename, extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Language } from 'cortico/core/language.ts';
 import type { Logger, ToolDef, ToolOutcome, World, WorldHost, WorldLamp, WorldWebUiDecl } from 'cortico/core/types.ts';
+import type { DeepPartial } from 'cortico/world.ts';
 import { nowIso } from 'cortico/core/util.ts';
 import { OUTPUT_GAIN, TIER_MODEL, type ModelVersion } from './catalog.ts';
 import { configGroups, GPT_SOVITS_ID, type GptSovitsConfigSection, type Tier } from './config.ts';
@@ -27,17 +28,18 @@ import { SovitsServer, type ServerState } from './server.ts';
 import { speechText } from './speech-text.ts';
 import { synthesize, type SynthRequest } from './synth.ts';
 import { SOVITS_TOOL_DECLS } from './tools.ts';
+import { DEFAULT_PRESET, isPreset, type VoicePreset } from './voices.ts';
 
 const ENV_PROMPT_FILES = {
   zh: fileURLToPath(new URL('./ENV_PROMPT.md', import.meta.url)),
   en: fileURLToPath(new URL('./ENV_PROMPT.en.md', import.meta.url)),
 };
 
-/** 随包的默认音色;文件不在时没有默认音色。 */
-const DEFAULT_VOICE = {
-  audio: fileURLToPath(new URL('../assets/voice/default.wav', import.meta.url)),
-  textFile: fileURLToPath(new URL('../assets/voice/default.txt', import.meta.url)),
-};
+
+const presetFiles = (id: VoicePreset): { audio: string; text: string } => ({
+  audio: fileURLToPath(new URL(`../assets/voices/${id}.wav`, import.meta.url)),
+  text: fileURLToPath(new URL(`../assets/voices/${id}.txt`, import.meta.url)),
+});
 
 /** 预热的三句：中、英、日的文本前端各在首次使用时加载。 */
 const WARMUP = ['你好。', 'Hello.', 'こんにちは。'];
@@ -56,7 +58,7 @@ export interface GptSovitsWorldOptions {
   dataDir: string;
   runtimesRoot: () => string;
   modelsRoot: () => string;
-  persist(patch: Partial<GptSovitsConfigSection>): void;
+  persist(patch: DeepPartial<GptSovitsConfigSection>): void;
 }
 
 type Backend =
@@ -120,12 +122,13 @@ export class GptSovitsWorld implements World {
     return st.phase === 'ready' && this.warmed ? st.url : null;
   }
 
-  private voice(): { audio: string; text: string } | null {
-    if (this.cfg.voice.audio && existsSync(this.cfg.voice.audio)) return this.cfg.voice;
-    if (existsSync(DEFAULT_VOICE.audio) && existsSync(DEFAULT_VOICE.textFile)) {
-      return { audio: DEFAULT_VOICE.audio, text: readText(DEFAULT_VOICE.textFile) };
-    }
-    return null;
+  /** 自定义参考音频优先，其次是选中的预设音色。 */
+  private voice(): { audio: string; text: string; preset: string | null } | null {
+    const v = this.cfg.voice;
+    if (v.audio && existsSync(v.audio)) return { audio: v.audio, text: v.text, preset: null };
+    const id = isPreset(v.preset) ? v.preset : DEFAULT_PRESET;
+    const f = presetFiles(id);
+    return existsSync(f.audio) && existsSync(f.text) ? { audio: f.audio, text: readText(f.text), preset: id } : null;
   }
 
   envPromptVars(): Record<string, string> {
@@ -379,7 +382,7 @@ export class GptSovitsWorld implements World {
       runtime: { ...this.runtime.status(), dir: b.kind === 'remote' ? b.url : b.dir, published: this.runtime.published(), bytes: this.runtime.bytes(), own: b.kind === 'own' && isRuntimeDir(b.dir) },
       weights: { ...this.weights.status(), dir: this.weights.dir(), bytes: this.weights.bytes() },
       server: { ...this.server.state(), warming: this.warming, warmed: this.warmed },
-      voice: voice ? { audio: voice.audio, text: voice.text, isDefault: voice.audio === DEFAULT_VOICE.audio } : null,
+      voice: voice ? { audio: voice.audio, text: voice.text, preset: voice.preset } : null,
       queue: this.queue.length + (this.current ? 1 : 0),
       playing: this.player.playing,
       lastError: this.lastError,
@@ -397,7 +400,7 @@ export interface PanelState {
   runtime: JobState & { dir: string; published: boolean; bytes: number; own: boolean };
   weights: JobState & { dir: string; bytes: number };
   server: ServerState & { warming: boolean; warmed: boolean };
-  voice: { audio: string; text: string; isDefault: boolean } | null;
+  voice: { audio: string; text: string; preset: string | null } | null;
   queue: number;
   playing: boolean;
   lastError: string | null;
