@@ -1,0 +1,48 @@
+import { join } from 'node:path';
+import { modelsRoot, runtimesRoot } from 'cortico/paths.ts';
+import { describeTools, type WorldDefinition, type WorldDescribe } from 'cortico/world.ts';
+import {
+  DEVICE_OPTIONS, GPT_SOVITS_DEFAULTS, GPT_SOVITS_ID, PROMPT_LANGUAGE_OPTIONS, TIER_OPTIONS,
+  promptLanguageOptions, systemDeviceLabel, tierOptions, type GptSovitsConfigSection,
+} from './config.ts';
+import { listOutputDevices } from './player.ts';
+import { SOVITS_TOOL_DECLS } from './tools.ts';
+import { GptSovitsWorld, STATE_EVENT } from './world.ts';
+
+const DESCRIBE: WorldDescribe = {
+  tools: describeTools(SOVITS_TOOL_DECLS, {
+    sovits_speak: { zh: '用 GPT-SoVITS 把一句台词念出来，排在没念完的句子后面。', en: 'Says a line aloud with GPT-SoVITS, after any line still playing.' },
+    sovits_hush: { zh: '停下正在念的句子并清空队列。', en: 'Stops the line playing and drops the queue.' },
+  }),
+  events: [{
+    type: STATE_EVENT,
+    description: { zh: '语音变为可用或不可用，随下一批事件送达。', en: 'The voice became available or unavailable; delivered with the next batch of events.' },
+    trigger: 'piggyback',
+  }],
+};
+
+export const GPT_SOVITS: WorldDefinition<GptSovitsConfigSection> = {
+  id: GPT_SOVITS_ID,
+  label: 'GPTSovits 语音',
+  defaults: () => structuredClone(GPT_SOVITS_DEFAULTS),
+  configOptions(kind, language) {
+    if (kind === TIER_OPTIONS) return tierOptions(language);
+    if (kind === PROMPT_LANGUAGE_OPTIONS) return promptLanguageOptions();
+    if (kind === DEVICE_OPTIONS) {
+      let devices: Array<{ value: string; label: string }> = [];
+      try { devices = listOutputDevices().map((d) => ({ value: d.name, label: d.name })); } catch { /* audify 不可用时只留系统默认 */ }
+      return [{ value: '', label: systemDeviceLabel(language) }, ...devices];
+    }
+    return [];
+  },
+  // ctx.cfg 是 `worlds.gpt-sovits` 的活引用：热改的键现读即生效
+  create: (ctx) => new GptSovitsWorld({
+    cfg: ctx.cfg,
+    timezone: ctx.timezone,
+    dataDir: join(ctx.dataDir, 'gpt-sovits'),
+    runtimesRoot,
+    modelsRoot,
+    persist: (patch) => ctx.persist(patch),
+  }),
+  describe: DESCRIBE,
+};

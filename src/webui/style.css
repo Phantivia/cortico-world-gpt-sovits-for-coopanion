@@ -1,0 +1,11 @@
+.gsv-row { display: grid; grid-template-columns: 6em auto 1fr auto; align-items: center; gap: .6em; padding: .35em 0; }
+.gsv-row[hidden] { display: none; }
+.gsv-name { opacity: .75; }
+.gsv-pill { padding: .1em .55em; border-radius: 999px; font-size: .85em; white-space: nowrap; background: var(--bg-2, rgba(127, 127, 127, .15)); }
+.gsv-pill[data-tone="on"] { color: var(--ok, #2e8b57); }
+.gsv-pill[data-tone="warn"] { color: var(--warn, #b8860b); }
+.gsv-pill[data-tone="bad"] { color: var(--bad, #c0392b); }
+.gsv-detail { font-size: .85em; opacity: .7; overflow-wrap: anywhere; }
+.gsv-acts { display: flex; gap: .4em; }
+.gsv-output { max-height: 12em; overflow: auto; font-size: .8em; opacity: .8; white-space: pre-wrap; }
+.gsv-voice-current { font-size: .85em; opacity: .8; overflow-wrap: anywhere; margin-bottom: .5em; }

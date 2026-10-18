@@ -1,0 +1,64 @@
+{
+  "name": "cortico-world-gpt-sovits-for-coopanion",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Cortico World for Coopanion: speaks the pet's lines aloud with GPT-SoVITS (V5 on NVIDIA GPUs, a CPU tier otherwise), installing a portable runtime and weights in one click",
+  "author": "Phantivia",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Phantivia/cortico-world-gpt-sovits-for-coopanion.git"
+  },
+  "homepage": "https://github.com/Phantivia/cortico-world-gpt-sovits-for-coopanion#readme",
+  "bugs": {
+    "url": "https://github.com/Phantivia/cortico-world-gpt-sovits-for-coopanion/issues"
+  },
+  "keywords": [
+    "cortico-world",
+    "cortico",
+    "coopanion",
+    "tts",
+    "gpt-sovits"
+  ],
+  "os": [
+    "win32"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@11.5.0",
+  "main": "./src/index.ts",
+  "cortico": {
+    "kind": "world",
+    "api": 6,
+    "displayName": "GPTSovits 语音",
+    "webUiClient": "dist/webui.js",
+    "webUiStyle": "dist/webui.css",
+    "describe": "describe.json"
+  },
+  "files": [
+    "src",
+    "dist",
+    "README.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md",
+    "CHANGELOG.md",
+    "describe.json"
+  ],
+  "scripts": {
+    "build": "node scripts/build-webui.mjs",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "audify": "^1.10.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "cortico": "^0.2.3",
+    "esbuild": "^0.28.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

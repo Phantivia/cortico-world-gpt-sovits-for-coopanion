@@ -1,0 +1,114 @@
+/**
+ * 面板文案(中、英)与发给模型的状态词(按 `promptLanguage`)。浏览器侧的面板也用这张表，
+ * 所以这里只 `import type` 框架：简体与繁体中文读中文，其余语言读英文。
+ */
+import type { Language } from 'cortico/core/language.ts';
+
+const PANEL = {
+  zh: {
+    label: 'GPTSovits 语音',
+    panel: '语音',
+    panelHint: '运行时与权重、推理服务、音色和试听。',
+    lamp: '推理服务',
+    tier: '推理档',
+    tierCuda: '显卡(V5 turbo)',
+    tierCpu: 'CPU(v2ProPlus)',
+    tierAuto: (found: boolean): string => (found ? '自动：检测到 NVIDIA 显卡' : '自动：没有检测到 NVIDIA 显卡'),
+    runtime: '运行时',
+    weights: '权重',
+    server: '推理服务',
+    voice: '音色',
+    ownRuntime: '自备目录',
+    remote: '已有服务',
+    ready: '已就绪',
+    absent: '未安装',
+    working: '下载中',
+    error: '失败',
+    unpublished: '这一档还没有发布运行时包，请在配置里填写自备运行时目录或已有服务地址。',
+    stopped: '已停止',
+    starting: '启动中',
+    warming: '预热中',
+    running: '运行中',
+    install: '安装并启动',
+    installSize: (mb: number) => `安装并启动(下载 ${mb} MB)`,
+    cancel: '取消',
+    start: '启动',
+    stop: '停止',
+    restart: '重启',
+    test: '试听',
+    testText: '你好呀，我现在可以说话啦。',
+    hush: '停止播放',
+    pickVoice: '选择参考音频',
+    voiceText: '参考音频的文字',
+    saveVoice: '保存音色',
+    voiceHint: '3–10 秒的 WAV，内容与下面填写的文字一致。',
+    defaultVoice: '默认音色',
+    noVoice: '还没有参考音频',
+    queue: (n: number) => `排队 ${n} 句`,
+    lastError: '上次合成失败',
+    output: '推理服务输出',
+    startMs: (s: number) => `启动用了 ${s} 秒`,
+  },
+  en: {
+    label: 'GPTSovits Voice',
+    panel: 'Voice',
+    panelHint: 'Runtime and weights, the inference server, the voice and a test line.',
+    lamp: 'Inference server',
+    tier: 'Tier',
+    tierCuda: 'GPU (V5 turbo)',
+    tierCpu: 'CPU (v2ProPlus)',
+    tierAuto: (found: boolean) => (found ? 'Auto: NVIDIA GPU found' : 'Auto: no NVIDIA GPU found'),
+    runtime: 'Runtime',
+    weights: 'Weights',
+    server: 'Inference server',
+    voice: 'Voice',
+    ownRuntime: 'Own directory',
+    remote: 'Existing server',
+    ready: 'Ready',
+    absent: 'Not installed',
+    working: 'Downloading',
+    error: 'Failed',
+    unpublished: 'No runtime package is published for this tier yet; set an own runtime directory or an existing server address in the config.',
+    stopped: 'Stopped',
+    starting: 'Starting',
+    warming: 'Warming up',
+    running: 'Running',
+    install: 'Install and start',
+    installSize: (mb: number) => `Install and start (${mb} MB download)`,
+    cancel: 'Cancel',
+    start: 'Start',
+    stop: 'Stop',
+    restart: 'Restart',
+    test: 'Test',
+    testText: 'Hello! I can talk now.',
+    hush: 'Stop playback',
+    pickVoice: 'Choose reference audio',
+    voiceText: 'Text of the reference audio',
+    saveVoice: 'Save voice',
+    voiceHint: 'A 3–10 second WAV whose words match the text below.',
+    defaultVoice: 'Default voice',
+    noVoice: 'No reference audio yet',
+    queue: (n: number) => `${n} queued`,
+    lastError: 'Last synthesis failed',
+    output: 'Inference server output',
+    startMs: (s: number) => `Started in ${s} s`,
+  },
+};
+
+export type PanelText = (typeof PANEL)['zh'];
+export const panelText = (language: Language): PanelText => (language === 'zh' || language === 'zh-Hant' ? PANEL.zh : PANEL.en);
+
+/** `{{sovits.state}}` 的取值。 */
+const STATE = {
+  zh: {
+    available: '可用', notInstalled: '未安装', starting: '启动中', noVoice: '没有设置参考音频', error: (d: string): string => `出错(${d})`,
+    nowAvailable: '语音可用了。', nowUnavailable: (d: string): string => `语音不可用了:${d}`,
+  },
+  en: {
+    available: 'available', notInstalled: 'not installed', starting: 'starting', noVoice: 'no reference audio set', error: (d: string): string => `failed (${d})`,
+    nowAvailable: 'The voice is available now.', nowUnavailable: (d: string): string => `The voice is unavailable now: ${d}`,
+  },
+};
+
+export type StateWords = (typeof STATE)['zh'];
+export const stateWords = (language: 'zh' | 'en'): StateWords => STATE[language];
