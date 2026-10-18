@@ -34,11 +34,30 @@ export interface RuntimeAsset {
 }
 
 const MS_OWN = 'https://www.modelscope.cn/models/Phantivia/gpt-sovits-for-coopanion/resolve/master';
+const GH_OWN = `https://github.com/Phantivia/cortico-world-gpt-sovits-for-coopanion/releases/download/runtime-${RUNTIME_VERSION}`;
 
-/** bytes 为 0 的档还没有发布包，只能用自备目录或已有服务。 */
+const CUDA_FILE = `gpt-sovits-${RUNTIME_VERSION}-win-x64-cu128.zip`;
+const CPU_FILE = `gpt-sovits-${RUNTIME_VERSION}-win-x64-cpu.zip`;
+
+/** 魔搭放整包;GitHub Release 放不下 2 GiB 以上的整包，显卡档在那里只有分片。 */
 export const RUNTIME_ASSETS: Readonly<Record<Tier, RuntimeAsset>> = {
-  cuda: { file: `gpt-sovits-${RUNTIME_VERSION}-win-x64-cu128.zip`, bytes: 0, sha256: '', sources: [] },
-  cpu: { file: `gpt-sovits-${RUNTIME_VERSION}-win-x64-cpu.zip`, bytes: 0, sha256: '', sources: [] },
+  cuda: {
+    file: CUDA_FILE,
+    bytes: 4140732064,
+    sha256: '87c775a93f9b13195b83bc2901a6176f771e31076bc051acf07a5ccca1db7a78',
+    sources: [`${MS_OWN}/runtime/${CUDA_FILE}`],
+    parts: [
+      { bytes: 1992294400, sources: [`${GH_OWN}/${CUDA_FILE}.part0`] },
+      { bytes: 1992294400, sources: [`${GH_OWN}/${CUDA_FILE}.part1`] },
+      { bytes: 156143264, sources: [`${GH_OWN}/${CUDA_FILE}.part2`] },
+    ],
+  },
+  cpu: {
+    file: CPU_FILE,
+    bytes: 1036310624,
+    sha256: '9ce348074e941388544b4db072ee0b9cfc50c9bd420e61f13ee9364fe90152e1',
+    sources: [`${MS_OWN}/runtime/${CPU_FILE}`, `${GH_OWN}/${CPU_FILE}`],
+  },
 };
 
 /** 每档用的模型版本，即 api_v2 配置里的 `version`。 */
