@@ -1,6 +1,6 @@
 # Third-party notices
 
-`assets/voices/` 的 8 段预设参考音频由 [OpenMOSS-Team/MOSS-VoiceGenerator](https://huggingface.co/OpenMOSS-Team/MOSS-VoiceGenerator)(Apache-2.0)按文字描述生成，不是任何真人的录音。
+`assets/voices/` 的 2 段预设参考音频由 [OpenMOSS-Team/MOSS-VoiceGenerator](https://huggingface.co/OpenMOSS-Team/MOSS-VoiceGenerator)(Apache-2.0)按文字描述生成，不是任何真人的录音。
 
 本包不含第三方代码与权重。托管安装时下载：
 

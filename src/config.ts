@@ -37,7 +37,7 @@ export const GPT_SOVITS_DEFAULTS: GptSovitsConfigSection = {
   runtimeDir: '',
   serverUrl: '',
   autoStart: true,
-  voice: { preset: 'coo-f', audio: '', text: '' },
+  voice: { preset: 'female', audio: '', text: '' },
   speed: 1,
   volume: 1,
   outputDevice: '',

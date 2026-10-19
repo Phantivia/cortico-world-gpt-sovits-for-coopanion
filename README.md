@@ -23,12 +23,11 @@ Owner: `src/world.ts`
 
 ## 预设音色
 
-随包带 8 个预设音色：Coopanion 四个开局人设(默认 Coo、铸、心、冬)各一男一女，在配置「音色」里选择，默认「默认 Coo · 女声」。
+随包带女声、男声两个预设音色，在配置「音色」里选择，默认女声。
 面板上传了自定义参考音频时用自定义的，「改回预设音色」清掉它。
 
-预设音色由 [MOSS-VoiceGenerator](https://huggingface.co/OpenMOSS-Team/MOSS-VoiceGenerator) 按文字描述生成：人物与音色按人设写，
-说话方式统一要求语速快、语调平、不带情绪;参考文字是一句带语气词和口误的口语。每个音色生成 6 段候选，按 Whisper 识别
-与参考文字一致、时长 3–10 秒、基频合乎性别的条件筛选，再取音高起伏小、语速快的一段。描述与参数在 `assets/voices/prompts.json`。
+预设音色由 [MOSS-VoiceGenerator](https://huggingface.co/OpenMOSS-Team/MOSS-VoiceGenerator) 按文字描述生成，参考文字是一句带语气词的口语，
+时长 3–10 秒，经 Whisper 核对与参考文字一致。描述、种子与解码参数在 `assets/voices/prompts.json`。
 
 ## 推理后端
 
@@ -54,7 +53,7 @@ Owner: `src/world.ts`
 | 键 | 默认 | 说明 |
 |---|---|---|
 | `tier` | `auto` | `auto` / `cuda` / `cpu`,重启推理服务生效 |
-| `voice.preset` | `coo-f` | 预设音色 |
+| `voice.preset` | `female` | 预设音色:`female` / `male` |
 | `voice.audio`、`voice.text` | 空 | 自定义参考音频(3–10 秒 WAV)与它的文字;面板可上传，填了就不用预设音色 |
 | `speed` | 1 | 语速，对应 api_v2 的 `speed_factor` |
 | `volume` | 1 | 0–1 |
