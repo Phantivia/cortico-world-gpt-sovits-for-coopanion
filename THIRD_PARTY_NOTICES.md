@@ -2,7 +2,9 @@
 
 `assets/voices/` 的 2 段预设参考音频由 [OpenMOSS-Team/MOSS-VoiceGenerator](https://huggingface.co/OpenMOSS-Team/MOSS-VoiceGenerator)(Apache-2.0)按文字描述生成，不是任何真人的录音。
 
-本包不含第三方代码与权重。托管安装时下载：
+`vendor/audify/` 是 [audify](https://github.com/almoghamdani/audify) 1.10.1 官方发布的 napi-v10 win32-x64 预编译件(`audify.node`、`rtaudio.dll`、`opus.dll`),原样随包，用来放声。许可：audify MIT(`LICENSE`)、[RtAudio](https://github.com/thestk/rtaudio) MIT 式(`LICENSE.rtaudio`)、[Opus](https://opus-codec.org/) BSD-3-Clause(`COPYING.opus`)。
+
+除此之外本包不含第三方代码与权重。托管安装时下载：
 
 | 内容 | 来源 | 许可 |
 |---|---|---|

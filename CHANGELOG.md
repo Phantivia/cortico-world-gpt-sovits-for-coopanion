@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1
+
+- 随包带 audify 的预编译件，不再从 npm 装 audify:它安装时要从 GitHub 下预编译件，下不到就现场编译，没有编译工具的机器装不上。
+
 ## 0.1.0
 
 - 首个版本：`sovits_speak` / `sovits_hush`,显卡档 V5 turbo、CPU 档 v2ProPlus,已有服务、自备目录与托管安装三种后端，

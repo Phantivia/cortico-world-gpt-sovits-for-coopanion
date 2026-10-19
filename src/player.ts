@@ -68,9 +68,15 @@ export function applyGain(pcm: Buffer, gain: number): Buffer {
  */
 const apiOf = (a: AudifyModule): number | undefined => (process.platform === 'win32' ? a.RtAudioApi.WINDOWS_WASAPI : undefined);
 
-/** 用到时才加载原生模块;加载失败返回 null,由调用方报告。 */
+/**
+ * 用到时才加载原生模块;加载失败时抛出，由调用方报告。
+ * 随包带 audify 1.10.1 官方 napi-v10 win32-x64 预编译件(`vendor/audify/`),不装 npm 的 audify:
+ * 它安装时去 GitHub 下预编译件，下不到就现场编译，用户机器没有编译工具就装不上。
+ * 枚举值取自 audify 的 index.js。
+ */
 function loadAudify(): AudifyModule {
-  return createRequire(import.meta.url)('audify') as AudifyModule;
+  const binding = createRequire(import.meta.url)('../vendor/audify/audify.node') as Pick<AudifyModule, 'RtAudio'>;
+  return { RtAudio: binding.RtAudio, RtAudioFormat: { RTAUDIO_SINT16: 0x2 }, RtAudioApi: { WINDOWS_WASAPI: 7 } };
 }
 
 export interface OutputDevice { id: number; name: string; isDefault: boolean }
