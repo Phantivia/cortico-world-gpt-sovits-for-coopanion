@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { INLINE_TAG_MAX, speechText } from '../src/speech-text.ts';
 import { parseWavHeader, pcmChunks } from '../src/synth.ts';
-import { applyGain } from '../src/player.ts';
+import { applyGain, upmix } from '../src/player.ts';
 
 describe('speechText', () => {
   it('drops the bubble markup the pet parses as actions', () => {
@@ -60,5 +60,13 @@ describe('applyGain', () => {
     expect(v[4]).toBe(800);
     expect(v[0]).toBeGreaterThanOrEqual(v[2]!);
     expect(v[2]).toBeGreaterThan(24000);
+  });
+});
+
+// 单声道流在立体声设备上只进左声道(10-18 操作员听出来的),播放器改为开双声道并复制样本
+describe('upmix', () => {
+  it('copies every mono sample to both channels in order', () => {
+    const out = upmix(Buffer.from(Int16Array.from([1, -2, 300]).buffer), 2);
+    expect(Array.from(new Int16Array(out.buffer, out.byteOffset, 6))).toEqual([1, 1, -2, -2, 300, 300]);
   });
 });

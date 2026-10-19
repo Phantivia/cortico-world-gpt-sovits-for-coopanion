@@ -12,10 +12,10 @@
       "postprocess": "峰值归一到 -1 dBFS"
     },
     "male": {
-      "instruction": "二十岁左右的年轻男生，声音清爽柔和，语速很快，一口气说完，语调平平的，没有情绪起伏，像随口跟熟人说话。",
-      "text": "嗯，那个，文件我放，呃，放桌面上了，就在那个新建文件夹里。",
-      "seed": 4004,
-      "audio_temperature": 1.2,
+      "instruction": "普通话，十六岁男高中生，录音棚音质。小迷糊，非常害羞。语速很快，没有停顿",
+      "text": "啊，那个，我刚才是不是又说错了？没事没事，再来一遍！",
+      "seed": 178127514,
+      "audio_temperature": 1.5,
       "audio_top_p": 0.6,
       "audio_top_k": 50,
       "audio_repetition_penalty": 1.1,

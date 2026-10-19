@@ -1,5 +1,6 @@
 /**
  * 本机声卡播放：PCM16 单声道经 audify(RtAudio,Windows 上走 WASAPI)按到达顺序写进一条输出流。
+ * 设备有两个以上输出声道时开双声道流，每个样本复制到左右两路;只开一个声道时 RtAudio 只送进左声道。
  * audify 的输出队列无界、`write()` 不阻塞，所以排队即顺序;`cut()` 关流丢弃队列里没播的部分。
  * 播完时刻按写入的帧数换算墙钟，只用来报「正在说」。
  */
@@ -37,6 +38,16 @@ const FRAME_MS = 20;
 
 /** 软限幅的拐点：绝对值超过它的样本按 tanh 压到满幅以内。 */
 const KNEE = 24000;
+
+/** 单声道 PCM16 复制成 `channels` 路交错。 */
+export function upmix(mono: Buffer, channels: number): Buffer {
+  if (channels === 1) return mono;
+  const out = Buffer.alloc(mono.length * channels);
+  for (let i = 0, o = 0; i + 1 < mono.length; i += 2) {
+    for (let c = 0; c < channels; c++, o += 2) { out[o] = mono[i]!; out[o + 1] = mono[i + 1]!; }
+  }
+  return out;
+}
 
 /** 乘增益;超过拐点的部分平滑压缩，不硬削顶。 */
 export function applyGain(pcm: Buffer, gain: number): Buffer {
@@ -84,7 +95,9 @@ export class Player {
   private rt: RtAudioLike | null = null;
   private rate = 0;
   private openedDevice = '';
+  /** 一帧单声道的字节数;写入时再按声道数展开。 */
   private frameBytes = 0;
+  private channels = 1;
   private carry = Buffer.alloc(0);
   /** 写进去的音频预计播完的墙钟时刻。 */
   private endsAt = 0;
@@ -109,7 +122,7 @@ export class Player {
     rt.outputVolume = Math.max(0, Math.min(1, this.opts.volume()));
     let buf = this.carry.length ? Buffer.concat([this.carry, pcm]) : pcm;
     const whole = buf.length - (buf.length % this.frameBytes);
-    for (let at = 0; at < whole; at += this.frameBytes) rt.write(buf.subarray(at, at + this.frameBytes));
+    for (let at = 0; at < whole; at += this.frameBytes) rt.write(upmix(buf.subarray(at, at + this.frameBytes), this.channels));
     this.carry = Buffer.from(buf.subarray(whole));
     const now = Date.now();
     this.endsAt = Math.max(this.endsAt, now) + (whole / 2 / sampleRate) * 1000;
@@ -120,7 +133,7 @@ export class Player {
     if (!this.rt || !this.carry.length) return;
     const frame = Buffer.alloc(this.frameBytes);
     this.carry.copy(frame);
-    this.rt.write(frame);
+    this.rt.write(upmix(frame, this.channels));
     this.endsAt = Math.max(this.endsAt, Date.now()) + FRAME_MS;
     this.carry = Buffer.alloc(0);
   }
@@ -150,13 +163,15 @@ export class Player {
     const devices = rt.getDevices().filter((d) => d.outputChannels > 0);
     const wanted = device ? devices.find((d) => d.name === device) ?? devices.find((d) => d.name.includes(device)) : undefined;
     const deviceId = wanted?.id ?? rt.getDefaultOutputDevice();
+    const channels = Math.min(2, Math.max(1, devices.find((d) => d.id === deviceId)?.outputChannels ?? 2));
     const frameSize = Math.round(sampleRate * FRAME_MS / 1000);
-    rt.openStream({ deviceId, nChannels: 1, firstChannel: 0 }, null, audify.RtAudioFormat.RTAUDIO_SINT16, sampleRate, frameSize, 'cortico-gpt-sovits', null, null);
+    rt.openStream({ deviceId, nChannels: channels, firstChannel: 0 }, null, audify.RtAudioFormat.RTAUDIO_SINT16, sampleRate, frameSize, 'cortico-gpt-sovits', null, null);
     rt.start();
     this.rt = rt;
     this.rate = sampleRate;
     this.openedDevice = device;
     this.frameBytes = frameSize * 2;
+    this.channels = channels;
     this.endsAt = 0;
   }
 }
