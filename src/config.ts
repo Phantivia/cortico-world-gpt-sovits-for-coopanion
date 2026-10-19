@@ -55,7 +55,9 @@ export const VOICE_OPTIONS = `${GPT_SOVITS_ID}:voice`;
 const TEXT = {
   zh: {
     title: 'GPTSovits 语音',
-    preset: { title: '音色', description: '上传了自定义参考音频时用自定义的。' },
+    preset: { title: '音色', description: '填了自定义参考音频时用自定义的。' },
+    audio: { title: '自定义参考音频', description: '3–10 秒的 WAV。填了就不用上面的预设音色，清空后改回预设。' },
+    text: { title: '参考音频的台本', description: '参考音频里说的话，要逐字一致。' },
     tier: { title: '推理档', auto: '自动', cuda: '显卡(NVIDIA)', cpu: 'CPU', description: '自动：检测到 NVIDIA 显卡用显卡档，否则用 CPU 档。修改后重启推理服务生效。' },
     speed: { title: '语速', description: '1 为原速。' },
     volume: { title: '音量' },
@@ -67,7 +69,9 @@ const TEXT = {
   },
   en: {
     title: 'GPTSovits Voice',
-    preset: { title: 'Voice', description: 'An uploaded reference audio takes precedence.' },
+    preset: { title: 'Voice', description: 'A custom reference audio takes precedence.' },
+    audio: { title: 'Custom reference audio', description: 'A 3–10 second WAV. When set, the preset voice above is not used; clear it to go back to the preset.' },
+    text: { title: 'Reference transcript', description: 'The exact words spoken in the reference audio.' },
     tier: { title: 'Inference tier', auto: 'Auto', cuda: 'GPU (NVIDIA)', cpu: 'CPU', description: 'Auto uses the GPU tier when an NVIDIA GPU is found, the CPU tier otherwise. Takes effect when the inference server restarts.' },
     speed: { title: 'Speech rate', description: '1 is the original rate.' },
     volume: { title: 'Volume' },
@@ -99,6 +103,8 @@ export function configGroups(language: Language): ConfigGroup[] {
       title: t.title,
       properties: {
         [`${K}.voice.preset`]: { type: 'string', title: t.preset.title, description: t.preset.description, 'x-options': VOICE_OPTIONS, 'x-hot': true },
+        [`${K}.voice.audio`]: { type: 'string', title: t.audio.title, description: t.audio.description, 'x-path': { kind: 'file', extensions: ['.wav'] }, 'x-hot': true },
+        [`${K}.voice.text`]: { type: 'string', title: t.text.title, description: t.text.description, 'x-hot': true },
         [`${K}.tier`]: { type: 'string', title: t.tier.title, description: t.tier.description, 'x-options': TIER_OPTIONS, 'x-hot': true },
         [`${K}.speed`]: { type: 'number', title: t.speed.title, description: t.speed.description, minimum: SPEED_MIN, maximum: SPEED_MAX, multipleOf: .05, 'x-hot': true },
         [`${K}.volume`]: { type: 'number', title: t.volume.title, minimum: 0, maximum: 1, multipleOf: .05, 'x-hot': true },

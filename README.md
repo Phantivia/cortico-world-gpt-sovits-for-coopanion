@@ -54,7 +54,7 @@ Owner: `src/world.ts`
 |---|---|---|
 | `tier` | `auto` | `auto` / `cuda` / `cpu`,重启推理服务生效 |
 | `voice.preset` | `female` | 预设音色:`female` / `male` |
-| `voice.audio`、`voice.text` | 空 | 自定义参考音频(3–10 秒 WAV)与它的文字;面板可上传，填了就不用预设音色 |
+| `voice.audio`、`voice.text` | 空 | 自定义参考音频(3–10 秒 WAV)与它的台本;配置里可选本机文件，语音页可上传，填了就不用预设音色 |
 | `speed` | 1 | 语速，对应 api_v2 的 `speed_factor` |
 | `volume` | 1 | 0–1 |
 | `outputDevice` | 空 | 输出设备名，空为系统默认 |
