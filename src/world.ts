@@ -20,7 +20,7 @@ import type { Logger, ToolDef, ToolOutcome, World, WorldHost, WorldLamp, WorldWe
 import type { DeepPartial } from 'cortico/world.ts';
 import { nowIso } from 'cortico/core/util.ts';
 import { OUTPUT_GAIN, TIER_MODEL, type ModelVersion } from './catalog.ts';
-import { configGroups, GPT_SOVITS_ID, type GptSovitsConfigSection, type Tier } from './config.ts';
+import { configGroups, GPT_SOVITS_ID, REF_MAX_SECONDS, REF_MIN_SECONDS, type GptSovitsConfigSection, type Tier } from './config.ts';
 import { panelText, stateWords } from './i18n.ts';
 import { isRuntimeDir, RuntimeJob, WeightsJob, type JobState } from './install.ts';
 import { Player } from './player.ts';
@@ -29,6 +29,7 @@ import { speechText } from './speech-text.ts';
 import { synthesize, type SynthRequest } from './synth.ts';
 import { SOVITS_TOOL_DECLS } from './tools.ts';
 import { DEFAULT_PRESET, isPreset, type VoicePreset } from './voices.ts';
+import { readSeconds } from './wav.ts';
 
 const ENV_PROMPT_FILES = {
   zh: fileURLToPath(new URL('./ENV_PROMPT.md', import.meta.url)),
@@ -49,6 +50,13 @@ const SPEAK_WAIT_MAX_MS = 3000;
 
 /** 参考音频上传的大小上限：10 秒 48 kHz 立体声 PCM16 不到 2 MB,留足余量。 */
 const VOICE_MAX_BYTES = 8 * 1024 * 1024;
+
+/** 自定义参考音频时长不合 api_v2 要求时的说明;量不出时长就交给服务端判断。 */
+function referenceIssue(path: string): string | null {
+  const seconds = readSeconds(path);
+  if (seconds === null || (seconds >= REF_MIN_SECONDS && seconds <= REF_MAX_SECONDS)) return null;
+  return `the reference audio is ${seconds.toFixed(1)} s, but GPT-SoVITS needs ${REF_MIN_SECONDS}–${REF_MAX_SECONDS} s`;
+}
 
 export const STATE_EVENT = 'gpt-sovits.state';
 
@@ -86,6 +94,8 @@ export class GptSovitsWorld implements World {
   private launching = false;
   /** 上一次用事件报给 bot 的可用性。 */
   private announced: boolean | null = null;
+  /** 自定义参考音频时长不合要求时的说明,由 `voice()` 写入。 */
+  private voiceIssue: string | null = null;
 
   constructor(private readonly opts: GptSovitsWorldOptions) {
     this.runtime = new RuntimeJob(opts.runtimesRoot, () => this.tier());
@@ -122,10 +132,17 @@ export class GptSovitsWorld implements World {
     return st.phase === 'ready' && this.warmed ? st.url : null;
   }
 
-  /** 自定义参考音频优先，其次是选中的预设音色。 */
+  /**
+   * 自定义参考音频优先，其次是选中的预设音色。
+   * 自定义音频先量时长：超出 3–10 秒时 api_v2 只回 400、不说原因，这里替它说明。
+   */
   private voice(): { audio: string; text: string; preset: string | null } | null {
     const v = this.cfg.voice;
-    if (v.audio && existsSync(v.audio)) return { audio: v.audio, text: v.text, preset: null };
+    if (v.audio && existsSync(v.audio)) {
+      this.voiceIssue = referenceIssue(v.audio);
+      return this.voiceIssue ? null : { audio: v.audio, text: v.text, preset: null };
+    }
+    this.voiceIssue = null;
     const id = isPreset(v.preset) ? v.preset : DEFAULT_PRESET;
     const f = presetFiles(id);
     return existsSync(f.audio) && existsSync(f.text) ? { audio: f.audio, text: readText(f.text), preset: id } : null;
@@ -137,7 +154,7 @@ export class GptSovitsWorld implements World {
   }
 
   private stateFor(w: ReturnType<typeof stateWords>): string {
-    if (!this.voice()) return w.noVoice;
+    if (!this.voice()) return this.voiceIssue ?? w.noVoice;
     if (this.url()) return w.available;
     const st = this.server.state();
     if (st.phase === 'error') return w.error(st.detail ?? '');
@@ -157,7 +174,7 @@ export class GptSovitsWorld implements World {
   private async speak(script: string): Promise<ToolOutcome> {
     const text = speechText(script);
     if (!text) return { text: 'Nothing to say: the text has only markup.' };
-    if (!this.voice()) return { text: 'Voice unavailable: no reference audio is set.', failed: true };
+    if (!this.voice()) return { text: `Voice unavailable: ${this.voiceIssue ?? 'no reference audio is set'}.`, failed: true };
     if (!this.url()) return { text: `Voice unavailable: ${this.stateFor(stateWords('en'))}.`, failed: true };
     const ahead = this.queue.length + (this.current ? 1 : 0);
     let timer: NodeJS.Timeout | undefined;

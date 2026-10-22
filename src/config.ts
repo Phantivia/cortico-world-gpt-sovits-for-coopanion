@@ -31,6 +31,9 @@ export interface GptSovitsConfigSection {
 
 export const SPEED_MIN = .6, SPEED_MAX = 1.6;
 
+/** api_v2 只接受这个长度区间的参考音频,超出会直接回 400。 */
+export const REF_MIN_SECONDS = 3, REF_MAX_SECONDS = 10;
+
 export const GPT_SOVITS_DEFAULTS: GptSovitsConfigSection = {
   enabled: false,
   tier: 'auto',
