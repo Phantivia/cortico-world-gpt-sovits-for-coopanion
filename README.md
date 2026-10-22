@@ -62,6 +62,9 @@ Owner: `src/world.ts`
 | `serverUrl`、`runtimeDir` | 空 | 见上 |
 | `promptLanguage` | `zh` | 环境提示词语言 |
 
+自定义参考音频必须是 **3–10 秒**的 WAV。api_v2 收到范围外的音频只回一个不带原因的 `400 Bad Request`,
+所以扩展在合成前自己量一次时长，把「实际多长、要求多长」报出来(`sovits_speak` 的返回和环境提示词里的状态都带上)。
+
 ## 开发
 
 ```bash
