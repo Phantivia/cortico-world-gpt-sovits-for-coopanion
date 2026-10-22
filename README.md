@@ -42,6 +42,37 @@ Owner: `src/world.ts`
 
 本机服务以 `runtime/python.exe -I -X utf8 -u api_v2.py` 在运行时根下启动，监听 127.0.0.1 的空闲端口。
 
+## 自备训练权重
+
+默认只用插件自己下载的底座权重(`s1v3.ckpt` + `s2Gv5turbo.pth` / `s2Gv2ProPlus.pth`)，自己用 GPT-SoVITS 训出来的模型没处放。
+填了 `weights.gpt` 与 `weights.sovits` 就换成自己的:
+
+| 键 | 文件 | 是什么 |
+|---|---|---|
+| `weights.gpt` | `.ckpt` | s1 / T2S，「文本 → 语义 token」那一半;训练产物形如 `我的模型-e12.ckpt` |
+| `weights.sovits` | `.pth` | s2 / VITS，音色与声学那一半;LoRA 训练产物形如 `我的模型_e8_s672_l32.pth` |
+
+几条约定:
+
+- **两个要一起填**。只换 s1 不换 s2 出来的音色是不对的，插件会当成配置错误报出来，不静默生效。
+- **版本要和推理档一致**：显卡档是 `v5turbo`，CPU 档是 `v2ProPlus`。插件读 `.pth` 头两个字节判版本，
+  对不上就拦下来并说明原因，不让它到加载底座时才崩。
+- **配对取同一轮**：`-e8.ckpt` 配 `_e8_*.pth`，跨 epoch 混搭音色容易飘。
+- **生效方式**：本机后端写进 `tts_infer.<tier>.yaml`，随服务启动加载;服务已在跑时改成自备权重，
+  会调 `/set_gpt_weights` 与 `/set_sovits_weights` 就地换，**不用重启**。
+  清空回内置权重需要重启一次服务。
+- **`serverUrl`(连已有服务)也能用**：那种后端插件不写 yaml，自备权重完全靠就地换这条路生效。
+
+`.pth` 头字节对照(能在 `src/weights.ts` 里查到同一张表):
+
+| 头 | 版本 | 本扩展可用 |
+|---|---|---|
+| `08` | v5turbo LoRA | ✅ 显卡档 |
+| `06` | v2ProPlus | ✅ CPU 档 |
+| `07` | v5 LoRA | ❌ 底座不同 |
+| `05` | v2Pro | ❌ |
+| `04` / `03` / `02` / `01` / `00` | v4 / v3 / v2 / v1 | ❌ |
+
 ## 工具与事件
 
 - `sovits_speak(text)`:去掉 `【…】` 与 `<…>` 标记后合成，排在没念完的句子后面。
@@ -55,6 +86,7 @@ Owner: `src/world.ts`
 | `tier` | `auto` | `auto` / `cuda` / `cpu`,重启推理服务生效 |
 | `voice.preset` | `female` | 预设音色:`female` / `male` |
 | `voice.audio`、`voice.text` | 空 | 自定义参考音频(3–10 秒 WAV)与它的台本;配置里可选本机文件，语音页可上传，填了就不用预设音色 |
+| `weights.gpt`、`weights.sovits` | 空 | 自备训练权重:自己训的 s1(`.ckpt`)与 s2(`.pth`)。两个都填才生效，留空用内置权重;版本要和推理档一致 |
 | `speed` | 1 | 语速，对应 api_v2 的 `speed_factor` |
 | `volume` | 1 | 0–1 |
 | `outputDevice` | 空 | 输出设备名，空为系统默认 |

@@ -63,6 +63,24 @@ export async function* pcmChunks(body: AsyncIterable<Uint8Array>): AsyncGenerato
 /** api_v2 的流式档：3 首包最快。 */
 export const STREAMING_MODE = 3;
 
+/**
+ * 让正在跑的服务换成另一组权重：`/set_gpt_weights` 与 `/set_sovits_weights` 都是 GET 加
+ * `weights_path` 查询参数，成功回 `{"message":"success"}`。换权重不必重启进程，也不影响已建立的连接。
+ */
+export async function switchWeights(baseUrl: string, gpt: string, sovits: string, signal?: AbortSignal): Promise<void> {
+  for (const [endpoint, path] of [['set_gpt_weights', gpt], ['set_sovits_weights', sovits]] as const) {
+    const url = new URL(`/${endpoint}`, baseUrl);
+    url.searchParams.set('weights_path', path);
+    const res = await fetch(url, { method: 'GET', signal });
+    if (!res.ok) {
+      let detail = '';
+      try { detail = (await res.text()).slice(0, 200); } catch { /* 没回应体就算了 */ }
+      throw new Error(`${endpoint} 失败：HTTP ${res.status}${detail ? ` ${detail}` : ''}`);
+    }
+    await res.body?.cancel();
+  }
+}
+
 /** 发一句合成请求，按到达顺序吐出 PCM 块;HTTP 失败时抛出带服务端消息的错误。 */
 export async function* synthesize(baseUrl: string, req: SynthRequest, signal?: AbortSignal): AsyncGenerator<PcmChunk> {
   const res = await fetch(new URL('/tts', baseUrl), {
